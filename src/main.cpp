@@ -49,6 +49,8 @@ ezButton BTN_OUT(BTN_OUT_PIN);
 ezButton SW_V(SW_V_PIN);
 ezButton SW_A(SW_A_PIN);
 
+uint8_t arrow[8]  = {0x4,0xe,0x15,0x4,0x4,0x4,0x4,0x4};
+
 void setup() {
   Serial.begin(9600);
   // Button debounce time setting
@@ -65,6 +67,7 @@ void setup() {
   lcd.init();
   lcd.clear();         
   lcd.backlight();
+  lcd.createChar(0, arrow);
   lcd.setCursor(0,0);
   lcd.print("Set");
   lcd.setCursor(0,1);
@@ -100,6 +103,7 @@ void setup() {
   lcd.print("ON"); // TO DO: IMPLEMENT OUTPUT BUTTON TO CHANGE OUTPUT ON/OFF
   curr_col = 3;
   lcd.setCursor(curr_col,3);
+  // lcd.write(0);
   lcd.cursor();
   // dacWrite(DAC_V_PIN,0); // set DAC to 0V
 }
