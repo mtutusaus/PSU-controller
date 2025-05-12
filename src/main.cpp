@@ -53,9 +53,11 @@ void setup() {
   BTN_R.setDebounceTime(50);
   BTN_OUT.setDebounceTime(50);
   SW.setDebounceTime(50);
+
   // Input pins config
   pinMode(CLK_PIN,INPUT);
   pinMode(DT_PIN,INPUT);
+  
   // LCD initialization
   lcd.init();
   lcd.clear();         
