@@ -33,9 +33,11 @@ int current_disp_3 = 0;
 // float voltage_DAC = 0.0; // desired voltage at the DAC output
 // uint8_t DAC_bits; // voltage_DAC converter to a 8 bits value (DAC_scaled rounded)
 
+// to toggle output state depending on previous state
 bool output_state = false;
 
-LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 20 chars and 4 line display
+// set the LCD address to 0x27 for a 20 chars and 4 line display
+LiquidCrystal_I2C lcd(0x27,20,4);  
 
 ezButton BTN_L(BTN_L_PIN);
 ezButton BTN_R(BTN_R_PIN);
@@ -178,7 +180,6 @@ void loop() {
     }
     lcd.setCursor(curr_col,curr_row);
   }
-
   // MOVE CURSOR
   if(BTN_R.isPressed())
   {
