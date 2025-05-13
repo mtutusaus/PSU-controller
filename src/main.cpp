@@ -35,7 +35,6 @@ int current_disp_3 = 0;
 
 // to toggle output state depending on previous state
 bool output_state = false;
-bool input_state = false;
 
 // set the LCD address to 0x27 for a 20 chars and 4 line display
 LiquidCrystal_I2C lcd(0x27,20,4);  
@@ -60,46 +59,7 @@ void setup() {
   pinMode(DT_PIN,INPUT);
   
   // LCD initialization
-  lcd.init();
-  lcd.clear();         
-  lcd.backlight();
-  lcd.setCursor(0,0);
-  lcd.print("Set");
-  lcd.setCursor(0,1);
-  lcd.print(voltage_disp_1);
-  lcd.print(voltage_disp_2);
-  lcd.print(".");
-  lcd.print(voltage_disp_3);
-  lcd.setCursor(5,1);
-  lcd.print("V");
-  lcd.setCursor(0,2);
-  lcd.print(current_disp_1);
-  lcd.print(current_disp_2);
-  lcd.print(current_disp_3);
-  lcd.setCursor(4,2);
-  lcd.print("mA");
-  lcd.setCursor(7,0); lcd.print("|");
-  lcd.setCursor(7,1); lcd.print("|");
-  lcd.setCursor(7,2); lcd.print("|");
-  lcd.setCursor(7,3); lcd.print("|");
-  lcd.setCursor(8,0);
-  lcd.print("Sense");
-  lcd.setCursor(8,1);
-  lcd.print("00.0 V");
-  lcd.setCursor(8,2);
-  lcd.print("000 mA");
-  lcd.setCursor(15,0); lcd.print("|");
-  lcd.setCursor(15,1); lcd.print("|");
-  lcd.setCursor(15,2); lcd.print("|");
-  lcd.setCursor(15,3); lcd.print("|");
-  lcd.setCursor(16,0);
-  lcd.print("Out");
-  lcd.setCursor(17,1);
-  lcd.print("OFF");
-  curr_col = 3;
-  curr_row = 1;
-  lcd.setCursor(curr_col,curr_row);
-  lcd.cursor();
+  lcd_initialization();
 }
 
 void loop() {
@@ -221,4 +181,47 @@ void loop() {
         break;
     }
   }
+}
+
+void lcd_initialization(){
+  lcd.init();
+  lcd.clear();         
+  lcd.backlight();
+  lcd.setCursor(0,0);
+  lcd.print("Set");
+  lcd.setCursor(0,1);
+  lcd.print(voltage_disp_1);
+  lcd.print(voltage_disp_2);
+  lcd.print(".");
+  lcd.print(voltage_disp_3);
+  lcd.setCursor(5,1);
+  lcd.print("V");
+  lcd.setCursor(0,2);
+  lcd.print(current_disp_1);
+  lcd.print(current_disp_2);
+  lcd.print(current_disp_3);
+  lcd.setCursor(4,2);
+  lcd.print("mA");
+  lcd.setCursor(7,0); lcd.print("|");
+  lcd.setCursor(7,1); lcd.print("|");
+  lcd.setCursor(7,2); lcd.print("|");
+  lcd.setCursor(7,3); lcd.print("|");
+  lcd.setCursor(8,0);
+  lcd.print("Sense");
+  lcd.setCursor(8,1);
+  lcd.print("00.0 V");
+  lcd.setCursor(8,2);
+  lcd.print("000 mA");
+  lcd.setCursor(15,0); lcd.print("|");
+  lcd.setCursor(15,1); lcd.print("|");
+  lcd.setCursor(15,2); lcd.print("|");
+  lcd.setCursor(15,3); lcd.print("|");
+  lcd.setCursor(16,0);
+  lcd.print("Out");
+  lcd.setCursor(17,1);
+  lcd.print("OFF");
+  curr_col = 3;
+  curr_row = 1;
+  lcd.setCursor(curr_col,curr_row);
+  lcd.cursor();
 }
