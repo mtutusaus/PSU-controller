@@ -35,6 +35,7 @@ int current_disp_3 = 0;
 
 // to toggle output state depending on previous state
 bool output_state = false;
+bool input_state = false;
 
 // set the LCD address to 0x27 for a 20 chars and 4 line display
 LiquidCrystal_I2C lcd(0x27,20,4);  
