@@ -50,6 +50,49 @@ ezButton BTN_R(BTN_R_PIN);
 ezButton BTN_OUT(BTN_OUT_PIN);
 ezButton SW(SW_PIN);
 
+void lcd_initialization(){
+  lcd.init();
+  lcd.clear();         
+  lcd.backlight();
+  lcd.setCursor(0,0);
+  lcd.print("Set");
+  lcd.setCursor(0,1);
+  lcd.print(voltage_disp_1);
+  lcd.print(voltage_disp_2);
+  lcd.print(".");
+  lcd.print(voltage_disp_3);
+  lcd.setCursor(5,1);
+  lcd.print("V");
+  lcd.setCursor(0,2);
+  lcd.print(current_disp_1);
+  lcd.print(current_disp_2);
+  lcd.print(current_disp_3);
+  lcd.setCursor(4,2);
+  lcd.print("mA");
+  lcd.setCursor(7,0); lcd.print("|");
+  lcd.setCursor(7,1); lcd.print("|");
+  lcd.setCursor(7,2); lcd.print("|");
+  lcd.setCursor(7,3); lcd.print("|");
+  lcd.setCursor(8,0);
+  lcd.print("Sense");
+  lcd.setCursor(8,1);
+  lcd.print("00.0 V");
+  lcd.setCursor(8,2);
+  lcd.print("000 mA");
+  lcd.setCursor(15,0); lcd.print("|");
+  lcd.setCursor(15,1); lcd.print("|");
+  lcd.setCursor(15,2); lcd.print("|");
+  lcd.setCursor(15,3); lcd.print("|");
+  lcd.setCursor(16,0);
+  lcd.print("Out");
+  lcd.setCursor(17,1);
+  lcd.print("OFF");
+  curr_col = 3;
+  curr_row = 1;
+  lcd.setCursor(curr_col,curr_row);
+  lcd.cursor();
+}
+
 void setup() {
   Serial.begin(9600);
 
@@ -79,7 +122,7 @@ void loop() {
   if (CLK_PIN_state == 0xf000){
     CLK_PIN_state = 0x0000;
     if (curr_row == 1){ // VOLTAGE ROW
-      if (digitalRead(DT_PIN)){ // DIRECTION CW
+      if (digitalRead(DT_PIN)){ // DIRECTION CW INCREMENT
         switch(curr_col){
           case 0: voltage_disp_1++; break;
           case 1: voltage_disp_2++; break;
@@ -87,7 +130,7 @@ void loop() {
           default: break;
         }
       }
-      else{ // DIRECTION CCW
+      else{ // DIRECTION CCW DECREMENT
         switch(curr_col){
           case 0: voltage_disp_1--; break;
           case 1: voltage_disp_2--; break;
@@ -110,18 +153,16 @@ void loop() {
       lcd.setCursor(curr_col,curr_row);
     }
     else{ // CURRENT ROW
-      if (digitalRead(DT_PIN)){ // DIRECTION CW
+      if (digitalRead(DT_PIN)){ // DIRECTION CW INCREMENT
         switch (curr_col) {
           case 2:
             current_disp_3++;
             if (current_disp_3 > 9) {
               current_disp_3 = 0;
               current_disp_2++;
-              curr_col = 1;
               if (current_disp_2 > 9) {
                 current_disp_2 = 0;
                 current_disp_1++;
-                curr_col = 0;
               }
             }
             break;
@@ -131,7 +172,6 @@ void loop() {
             if (current_disp_2 > 9) {
               current_disp_2 = 0;
               current_disp_1++;
-              curr_col = 0;
             }
             break;
       
@@ -140,18 +180,16 @@ void loop() {
             break;
         }
       }
-      else{ // DIRECTION CCW
+      else{ // DIRECTION CCW DECREMENT
         switch (curr_col) {
           case 0:
             current_disp_1--;
             if (current_disp_1 < 0) {
               current_disp_1 = 0;
               current_disp_2--;
-              curr_col = 1;
               if (current_disp_2 < 0) {
                 current_disp_2 = 0;
-                current_disp_1--;
-                curr_col = 2;
+                current_disp_3--;
               }
             }
             break;
@@ -161,16 +199,28 @@ void loop() {
             if (current_disp_2 < 0) {
               current_disp_2 = 0;
               current_disp_3--;
-              curr_col = 2;
             }
             break;
       
           case 2:
             current_disp_3--;
+            if (current_disp_3 < 0 && current_disp_2 > 0){
+              current_disp_3 = 9;
+              current_disp_2--;
+            }
+            if (current_disp_2 < 0 && current_disp_1 > 0){
+              current_disp_2 = 9;
+              current_disp_3--;
+            }
             break;
         }
       }
       // UPDATE CURRENT DISPLAY
+      if ((current_disp_1*100+current_disp_2*10+current_disp_3) > 500){
+        current_disp_1 = 5;
+        current_disp_2 = 0;
+        current_disp_3 = 0;
+      }
       if (current_disp_1<0) {current_disp_1=0;}
       if (current_disp_1>5) {current_disp_1=5;}
       if (current_disp_2<0) {current_disp_2=0;}
@@ -187,8 +237,14 @@ void loop() {
 
   if(SW.isPressed()){
     switch(curr_row){
-      case 1: curr_row = 2; break; // move from voltage row to current's
-      case 2: curr_row = 1; break; // move from current row to voltage's
+      case 1: // move from voltage row to current's
+        curr_row = 2;
+        if (curr_col == 3) {curr_col = 2;} 
+        break; 
+      case 2: // move from current row to voltage's
+        curr_row = 1;
+        if (curr_col == 2) {curr_col = 3;}  
+        break; 
     }
     lcd.setCursor(curr_col,curr_row);
   }
@@ -233,47 +289,4 @@ void loop() {
         break;
     }
   }
-}
-
-void lcd_initialization(){
-  lcd.init();
-  lcd.clear();         
-  lcd.backlight();
-  lcd.setCursor(0,0);
-  lcd.print("Set");
-  lcd.setCursor(0,1);
-  lcd.print(voltage_disp_1);
-  lcd.print(voltage_disp_2);
-  lcd.print(".");
-  lcd.print(voltage_disp_3);
-  lcd.setCursor(5,1);
-  lcd.print("V");
-  lcd.setCursor(0,2);
-  lcd.print(current_disp_1);
-  lcd.print(current_disp_2);
-  lcd.print(current_disp_3);
-  lcd.setCursor(4,2);
-  lcd.print("mA");
-  lcd.setCursor(7,0); lcd.print("|");
-  lcd.setCursor(7,1); lcd.print("|");
-  lcd.setCursor(7,2); lcd.print("|");
-  lcd.setCursor(7,3); lcd.print("|");
-  lcd.setCursor(8,0);
-  lcd.print("Sense");
-  lcd.setCursor(8,1);
-  lcd.print("00.0 V");
-  lcd.setCursor(8,2);
-  lcd.print("000 mA");
-  lcd.setCursor(15,0); lcd.print("|");
-  lcd.setCursor(15,1); lcd.print("|");
-  lcd.setCursor(15,2); lcd.print("|");
-  lcd.setCursor(15,3); lcd.print("|");
-  lcd.setCursor(16,0);
-  lcd.print("Out");
-  lcd.setCursor(17,1);
-  lcd.print("OFF");
-  curr_col = 3;
-  curr_row = 1;
-  lcd.setCursor(curr_col,curr_row);
-  lcd.cursor();
 }
