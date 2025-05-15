@@ -282,6 +282,84 @@ void handleRotaryEncoder() {
   }
 }
 
+void changeSelectedVariable() {
+  if (SW.isPressed()) {
+    switch (curr_row) {
+      case 1: // move from voltage row to current row
+        curr_row = 2;
+        if (curr_col == 3) curr_col = 2;
+        break;
+      case 2: // move from current row to voltage row
+        curr_row = 1;
+        if (curr_col == 2) curr_col = 3;
+        break;
+    }
+    lcd.setCursor(curr_col, curr_row);
+  }
+}
+
+void moveCursorRight() {
+  if (BTN_R.isPressed()) {
+    switch (curr_row) {
+      case 1:
+        switch (curr_col){
+          case 0: curr_col++; break;
+          case 1: curr_col = 3; break;
+          case 3: curr_col = 3;
+        } break;
+      case 2:
+        curr_col++;
+        if (curr_col > 2) curr_col = 2;
+        break;
+    }
+    lcd.setCursor(curr_col, curr_row);
+    lcd.cursor();
+  }
+}
+
+void moveCursorLeft() {
+  if (BTN_L.isPressed()) {
+    switch (curr_row){
+      case 1:
+        switch (curr_col){
+          case 0: curr_col = 0; break;
+          case 1: curr_col--; break;
+          case 3: curr_col = 1; break;
+        } break;
+      case 2:
+        curr_col--;
+        if (curr_col < 0) curr_col = 0;
+        break;
+    }
+    lcd.setCursor(curr_col, curr_row);
+    lcd.cursor();
+  }
+}
+
+void toggleOutput() {
+  if (BTN_OUT.isPressed()) {
+    output_state = !output_state;
+    lcd.setCursor(17, 1);
+    if (output_state) {
+      lcd.print("   ");  // Clear previous
+      lcd.setCursor(17, 1);
+      lcd.print("ON");
+    } else {
+      lcd.print("  ");  // Clear previous
+      lcd.setCursor(17, 1);
+      lcd.print("OFF");
+    }
+    lcd.setCursor(curr_col, curr_row);
+  }
+}
+
+void handleInputs() {
+  changeSelectedVariable();
+  moveCursorRight();
+  moveCursorLeft();
+  toggleOutput();
+}
+
 void setup() {
   Serial.begin(9600);
 
@@ -306,60 +384,9 @@ void loop() {
   BTN_OUT.loop();
   SW.loop();
 
+  // Rotary encoder control
   handleRotaryEncoder();
 
-  if(SW.isPressed()){
-    switch(curr_row){
-      case 1: // move from voltage row to current's
-        curr_row = 2;
-        if (curr_col == 3) {curr_col = 2;} 
-        break; 
-      case 2: // move from current row to voltage's
-        curr_row = 1;
-        if (curr_col == 2) {curr_col = 3;}  
-        break; 
-    }
-    lcd.setCursor(curr_col,curr_row);
-  }
-
-  // MOVE CURSOR TO THE RIGHT
-  if(BTN_R.isPressed())
-  {
-    curr_col++;
-    if (curr_col>3) {curr_col=3;}
-    lcd.setCursor(curr_col,curr_row);
-    lcd.cursor();
-  }
-
-  // MOVE CURSOR TO THE LEFT
-  if(BTN_L.isPressed())
-  {
-    curr_col--;
-    if (curr_col<0) {curr_col=0;}
-    lcd.setCursor(curr_col,curr_row);
-    lcd.cursor();
-  }
-
-  // OUTPUT ENABLE
-  if(BTN_OUT.isPressed())
-  {
-    switch(output_state){
-      case false: 
-        output_state = true;
-        lcd.setCursor(17,1);
-        lcd.print(" "); lcd.print(" "); lcd.print(" ");
-        lcd.setCursor(17,1);
-        lcd.print("ON");
-        lcd.setCursor(curr_col,curr_row);
-        break;
-      case true: 
-        output_state = false; 
-        lcd.setCursor(17,1);
-        lcd.print(" "); lcd.print(" ");
-        lcd.setCursor(17,1);
-        lcd.print("OFF");
-        lcd.setCursor(curr_col,curr_row);
-        break;
-    }
-  }
+  // Input buttons control
+  handleInputs();
 }
