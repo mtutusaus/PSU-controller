@@ -35,12 +35,6 @@ int current_disp_3 = 0;
 // OUTPUT STATE
 bool output_state = false;
 
-// DIGIT BLINKING
-unsigned long last_blink_time = 0;
-bool blink_state = false;
-bool last_blink_state = false;
-const unsigned long blink_interval = 500; // in  ms
-
 // LCD DEFINITION (library: LiquidCrystal_I2C@^1.1.4)
 LiquidCrystal_I2C lcd(0x27,20,4); // set the LCD address to 0x27 for a 20 chars and 4 line display
 
