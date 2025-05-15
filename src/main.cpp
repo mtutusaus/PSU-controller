@@ -93,6 +93,195 @@ void lcd_initialization(){
   lcd.cursor();
 }
 
+void incrementVoltageDigit(int col) {
+  switch (col) {
+    case 0: // tens
+      voltage_disp_1++;
+      if (voltage_disp_1 > 2) { // clamp max 20.0
+        voltage_disp_1 = 2;
+        voltage_disp_2 = 0;
+        voltage_disp_3 = 0;
+      }
+      break;
+    case 1: // units
+      voltage_disp_2++;
+      if (voltage_disp_2 > 9) {
+        voltage_disp_2 = 0;
+        voltage_disp_1++;
+        if (voltage_disp_1 > 2) {
+          voltage_disp_1 = 2;
+          voltage_disp_2 = 0;
+          voltage_disp_3 = 0;
+        }
+      }
+      break;
+    case 3: // tenths
+      voltage_disp_3++;
+      if (voltage_disp_3 > 9) {
+        voltage_disp_3 = 0;
+        voltage_disp_2++;
+        if (voltage_disp_2 > 9) {
+          voltage_disp_2 = 0;
+          voltage_disp_1++;
+          if (voltage_disp_1 > 2) {
+            voltage_disp_1 = 2;
+            voltage_disp_2 = 0;
+            voltage_disp_3 = 0;
+          }
+        }
+      }
+      break;
+  }
+}
+
+void decrementVoltageDigit(int col) {
+  if (voltage_disp_1 == 0 && voltage_disp_2 == 0 && voltage_disp_3 == 0) return; // min reached
+
+  switch (col) {
+    case 0: // tens
+      if (voltage_disp_1 > 0) voltage_disp_1--;
+      break;
+    case 1: // units
+      voltage_disp_2--;
+      if (voltage_disp_2 < 0) {
+        if (voltage_disp_1 > 0) {
+          voltage_disp_2 = 9;
+          voltage_disp_1--;
+        } else {
+          voltage_disp_2 = 0;
+        }
+      }
+      break;
+    case 3: // tenths
+      voltage_disp_3--;
+      if (voltage_disp_3 < 0) {
+        if (voltage_disp_2 > 0 || voltage_disp_1 > 0) {
+          voltage_disp_3 = 9;
+          voltage_disp_2--;
+          if (voltage_disp_2 < 0) {
+            voltage_disp_2 = 9;
+            voltage_disp_1--;
+          }
+        } else {
+          voltage_disp_3 = 0;
+        }
+      }
+      break;
+  }
+}
+
+void incrementCurrentDigit(int col) {
+  switch (col) {
+    case 0: // hundreds
+      current_disp_1++;
+      if (current_disp_1 > 5) { // clamp max 500
+        current_disp_1 = 5;
+        current_disp_2 = 0;
+        current_disp_3 = 0;
+      }
+      break;
+    case 1: // tens
+      current_disp_2++;
+      if (current_disp_2 > 9) {
+        current_disp_2 = 0;
+        current_disp_1++;
+        if (current_disp_1 > 5) {
+          current_disp_1 = 5;
+          current_disp_2 = 0;
+          current_disp_3 = 0;
+        }
+      }
+      break;
+    case 2: // units
+      current_disp_3++;
+      if (current_disp_3 > 9) {
+        current_disp_3 = 0;
+        current_disp_2++;
+        if (current_disp_2 > 9) {
+          current_disp_2 = 0;
+          current_disp_1++;
+          if (current_disp_1 > 5) {
+            current_disp_1 = 5;
+            current_disp_2 = 0;
+            current_disp_3 = 0;
+          }
+        }
+      }
+      break;
+  }
+}
+
+void decrementCurrentDigit(int col) {
+  if (current_disp_1 == 0 && current_disp_2 == 0 && current_disp_3 == 0) return; // min reached
+
+  switch (col) {
+    case 0: // hundreds
+      if (current_disp_1 > 0) current_disp_1--;
+      break;
+    case 1: // tens
+      current_disp_2--;
+      if (current_disp_2 < 0) {
+        if (current_disp_1 > 0) {
+          current_disp_2 = 9;
+          current_disp_1--;
+        } else {
+          current_disp_2 = 0;
+        }
+      }
+      break;
+    case 2: // units
+      current_disp_3--;
+      if (current_disp_3 < 0) {
+        if (current_disp_2 > 0 || current_disp_1 > 0) {
+          current_disp_3 = 9;
+          current_disp_2--;
+          if (current_disp_2 < 0) {
+            current_disp_2 = 9;
+            current_disp_1--;
+          }
+        } else {
+          current_disp_3 = 0;
+        }
+      }
+      break;
+  }
+}
+
+void updateVoltageDisplay() {
+  lcd.setCursor(0,1);
+  lcd.print(voltage_disp_1);
+  lcd.print(voltage_disp_2);
+  lcd.print(".");
+  lcd.print(voltage_disp_3);
+  lcd.setCursor(curr_col, curr_row);
+}
+
+void updateCurrentDisplay() {
+  lcd.setCursor(0,2);
+  lcd.print(current_disp_1);
+  lcd.print(current_disp_2);
+  lcd.print(current_disp_3);
+  lcd.setCursor(curr_col, curr_row);
+}
+
+void handleRotaryEncoder() {
+  CLK_PIN_state = (CLK_PIN_state << 1) | digitalRead(CLK_PIN) | 0xE000;
+  if (CLK_PIN_state == 0xF000) {
+    CLK_PIN_state = 0x0000;
+
+    if (curr_row == 1) { // Voltage row
+      if (digitalRead(DT_PIN)) incrementVoltageDigit(curr_col);
+      else decrementVoltageDigit(curr_col);
+      updateVoltageDisplay();
+    } 
+    else if (curr_row == 2) { // Current row
+      if (digitalRead(DT_PIN)) incrementCurrentDigit(curr_col);
+      else decrementCurrentDigit(curr_col);
+      updateCurrentDisplay();
+    }
+  }
+}
+
 void setup() {
   Serial.begin(9600);
 
@@ -117,178 +306,7 @@ void loop() {
   BTN_OUT.loop();
   SW.loop();
 
-  // ROTARY ENCODER
-  CLK_PIN_state = (CLK_PIN_state<<1) | digitalRead(CLK_PIN) | 0xe000; // detects stable falling edge
-  if (CLK_PIN_state == 0xf000){
-    CLK_PIN_state = 0x0000;
-    if (curr_row == 1){ // VOLTAGE ROW
-      if (digitalRead(DT_PIN)){ // DIRECTION CW INCREMENT
-        switch(curr_col) {
-          case 0: // tens
-            voltage_disp_1++;
-            break;
-    
-          case 1: // units
-            voltage_disp_2++;
-            if (voltage_disp_2 > 9) {
-              voltage_disp_2 = 0;
-              voltage_disp_1++;
-            }
-            break;
-    
-          case 3: // tenths
-            voltage_disp_3++;
-            if (voltage_disp_3 > 9) {
-              voltage_disp_3 = 0;
-              voltage_disp_2++;
-              if (voltage_disp_2 > 9) {
-                voltage_disp_2 = 0;
-                voltage_disp_1++;
-              }
-            }
-            break;
-          }
-      }
-      else{ // DIRECTION CCW DECREMENT
-        // Check if already at minimum (00.0)
-  if (voltage_disp_1 == 0 && voltage_disp_2 == 0 && voltage_disp_3 == 0) {
-    // Already at minimum, do nothing
-  } else {
-    switch(curr_col) {
-      case 0: // tens
-        if (voltage_disp_1 > 0) {
-          voltage_disp_1--;
-        }
-        // else do nothing, can't go below 0 tens digit
-        break;
-
-      case 1: // units
-        voltage_disp_2--;
-        if (voltage_disp_2 < 0) {
-          if (voltage_disp_1 > 0) {
-            voltage_disp_2 = 9;
-            voltage_disp_1--;
-          } else {
-            voltage_disp_2 = 0;  // can't borrow because tens digit is 0
-          }
-        }
-        break;
-
-      case 3: // tenths
-        voltage_disp_3--;
-        if (voltage_disp_3 < 0) {
-          if (voltage_disp_2 > 0 || voltage_disp_1 > 0) {
-            voltage_disp_3 = 9;
-            voltage_disp_2--;
-            if (voltage_disp_2 < 0) {
-              voltage_disp_2 = 9;
-              voltage_disp_1--;
-            }
-          } else {
-            voltage_disp_3 = 0;  // can't borrow, all digits zero
-          }
-        }
-        break;
-    }
-  }
-        }
-      // UPDATE VOLTAGE DISPLAY
-      if ((voltage_disp_1 * 10 + voltage_disp_2 + voltage_disp_3 * 0.1) > 20.0) {
-        voltage_disp_1 = 2;
-        voltage_disp_2 = 0;
-        voltage_disp_3 = 0;
-      }
-      lcd.setCursor(0,1);
-      lcd.print(voltage_disp_1);
-      lcd.print(voltage_disp_2);
-      lcd.print(".");
-      lcd.print(voltage_disp_3);
-      lcd.setCursor(curr_col,curr_row);
-    }
-    else{ // CURRENT ROW
-      if (digitalRead(DT_PIN)){ // DIRECTION CW INCREMENT
-        if (curr_row == 2) {
-          switch(curr_col) {
-            case 0: // hundreds
-              current_disp_1++;
-              break;
-            case 1: // tens
-              current_disp_2++;
-              if (current_disp_2 > 9) {
-                current_disp_2 = 0;
-                current_disp_1++;
-              }
-              break;
-            case 2: // units
-              current_disp_3++;
-              if (current_disp_3 > 9) {
-                current_disp_3 = 0;
-                current_disp_2++;
-                if (current_disp_2 > 9) {
-                  current_disp_2 = 0;
-                  current_disp_1++;
-                }
-              }
-              break;
-          }
-        }
-      }
-      else{ // DIRECTION CCW DECREMENT
-        // Check if already at minimum (000)
-  if (current_disp_1 == 0 && current_disp_2 == 0 && current_disp_3 == 0) {
-    // Already at minimum, do nothing
-  } else {
-    switch(curr_col) {
-      case 0: // hundreds
-        if (current_disp_1 > 0) {
-          current_disp_1--;
-        }
-        // else do nothing, can't go below zero
-        break;
-
-      case 1: // tens
-        current_disp_2--;
-        if (current_disp_2 < 0) {
-          if (current_disp_1 > 0) {
-            current_disp_2 = 9;
-            current_disp_1--;
-          } else {
-            current_disp_2 = 0; // can't borrow, stay at zero
-          }
-        }
-        break;
-
-      case 2: // units
-        current_disp_3--;
-        if (current_disp_3 < 0) {
-          if (current_disp_2 > 0 || current_disp_1 > 0) {
-            current_disp_3 = 9;
-            current_disp_2--;
-            if (current_disp_2 < 0) {
-              current_disp_2 = 9;
-              current_disp_1--;
-            }
-          } else {
-            current_disp_3 = 0; // can't borrow, stay at zero
-          }
-        }
-        break;
-    }
-  }
-      }
-      // UPDATE CURRENT DISPLAY
-      if ((current_disp_1*100+current_disp_2*10+current_disp_3) > 500){
-        current_disp_1 = 5;
-        current_disp_2 = 0;
-        current_disp_3 = 0;
-      }
-      lcd.setCursor(0,2);
-      lcd.print(current_disp_1);
-      lcd.print(current_disp_2);
-      lcd.print(current_disp_3);
-      lcd.setCursor(curr_col,curr_row);
-    }
-  }
+  handleRotaryEncoder();
 
   if(SW.isPressed()){
     switch(curr_row){
