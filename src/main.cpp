@@ -44,6 +44,8 @@ ezButton BTN_R(BTN_R_PIN);
 ezButton BTN_OUT(BTN_OUT_PIN);
 ezButton SW(SW_PIN);
 
+// PROJECT FUNCTIONS
+
 void lcd_initialization(){
   lcd.init();
   lcd.clear();         
