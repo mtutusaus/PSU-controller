@@ -93,10 +93,8 @@ void incrementVoltageDigit(int col) {
   switch (col) {
     case 0: // tens
       voltage_disp_1++;
-      if (voltage_disp_1 > 2) { // clamp max 20.0
+      if (voltage_disp_1 > 2) {
         voltage_disp_1 = 2;
-        voltage_disp_2 = 0;
-        voltage_disp_3 = 0;
       }
       break;
     case 1: // units
@@ -106,8 +104,6 @@ void incrementVoltageDigit(int col) {
         voltage_disp_1++;
         if (voltage_disp_1 > 2) {
           voltage_disp_1 = 2;
-          voltage_disp_2 = 0;
-          voltage_disp_3 = 0;
         }
       }
       break;
@@ -121,12 +117,18 @@ void incrementVoltageDigit(int col) {
           voltage_disp_1++;
           if (voltage_disp_1 > 2) {
             voltage_disp_1 = 2;
-            voltage_disp_2 = 0;
-            voltage_disp_3 = 0;
           }
         }
       }
       break;
+  }
+
+  // Check total voltage and clamp to 20.0 if necessary
+  float voltage = voltage_disp_1 * 10.0 + voltage_disp_2 + voltage_disp_3 / 10.0;
+  if (voltage > 20.0) {
+    voltage_disp_1 = 2;
+    voltage_disp_2 = 0;
+    voltage_disp_3 = 0;
   }
 }
 
@@ -170,10 +172,8 @@ void incrementCurrentDigit(int col) {
   switch (col) {
     case 0: // hundreds
       current_disp_1++;
-      if (current_disp_1 > 5) { // clamp max 500
+      if (current_disp_1 > 5) {
         current_disp_1 = 5;
-        current_disp_2 = 0;
-        current_disp_3 = 0;
       }
       break;
     case 1: // tens
@@ -183,8 +183,6 @@ void incrementCurrentDigit(int col) {
         current_disp_1++;
         if (current_disp_1 > 5) {
           current_disp_1 = 5;
-          current_disp_2 = 0;
-          current_disp_3 = 0;
         }
       }
       break;
@@ -198,12 +196,18 @@ void incrementCurrentDigit(int col) {
           current_disp_1++;
           if (current_disp_1 > 5) {
             current_disp_1 = 5;
-            current_disp_2 = 0;
-            current_disp_3 = 0;
           }
         }
       }
       break;
+  }
+
+  // Final safety clamp
+  int current = current_disp_1 * 100 + current_disp_2 * 10 + current_disp_3;
+  if (current > 500) {
+    current_disp_1 = 5;
+    current_disp_2 = 0;
+    current_disp_3 = 0;
   }
 }
 
