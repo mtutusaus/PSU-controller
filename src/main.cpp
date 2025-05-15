@@ -22,6 +22,11 @@ uint16_t CLK_PIN_state;
 int curr_col;
 int curr_row;
 
+// DETECT ROTARY ENCODER LONG PRESS
+unsigned long pressStartTime = 0;
+bool isLongPressDetected = false;
+int timeLongPressed = 1000; // in ms
+
 // VOLTAGE DISPLAY (i.e. 12.3 V, 1 is voltage_disp_1, 2 is _2 and 3 is _3)
 int voltage_disp_1 = 0;
 int voltage_disp_2 = 0;
@@ -353,11 +358,37 @@ void toggleOutput() {
   }
 }
 
+void checkLongPress() {
+  if (SW.isPressed()) {
+    pressStartTime = millis();
+    isLongPressDetected = false;
+  }
+
+  if (SW.getState() == LOW) {
+    if (!isLongPressDetected && (millis() - pressStartTime >= timeLongPressed)) {
+      isLongPressDetected = true;
+      voltage_disp_1 = 0; voltage_disp_2 = 0; voltage_disp_3 = 0;
+      updateVoltageDisplay();
+      current_disp_1 = 0; current_disp_2 = 0; current_disp_3 = 0;
+      updateCurrentDisplay();
+      curr_col = 3;
+      curr_row = 1;
+      lcd.setCursor(curr_col,curr_row);
+    }
+  }
+
+  if (SW.isReleased()) {
+    pressStartTime = 0;
+    isLongPressDetected = false;
+  }
+}
+
 void handleInputs() {
   changeSelectedVariable();
   moveCursorRight();
   moveCursorLeft();
   toggleOutput();
+  checkLongPress();
 }
 
 void setup() {
