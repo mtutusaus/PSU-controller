@@ -12,7 +12,7 @@ A work-in-progress Power Supply Unit (PSU) controller based on the ESP32 microco
 ---
 ## **Development**
 
-- This project it is developed with AI assistance (Claude) for code suggestions, debugging, and optimization.
+- This project is developed with AI assistance (Claude) for code suggestions, debugging, and optimization.
 
 ---
 ## **License**
